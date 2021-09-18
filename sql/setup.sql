@@ -1,0 +1,3 @@
+CREATE USER shlomix WITH PASSWORD '@WSXcde32pg'
+
+CREATE DATABASE expensesDb WITH OWNER=Shlomi;

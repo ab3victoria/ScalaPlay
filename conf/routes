@@ -3,27 +3,21 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# An example controller showing a sample home page
+# Routes for users
 GET     /                           controllers.Application.index
-GET     /product                    controllers.Application.product(prodName, prodCategory, prodPrice: Double)
-GET     /product/:prodName/:prodCategory/:prodPrice                    controllers.Application.product(prodName, prodCategory, prodPrice: Double)
-# An example controller showing how to use dependency injection
-GET     /list                       controllers.ExpensesList.expensesList
-
-GET     /login                       controllers.ExpensesList.login
+GET     /login                      controllers.ExpensesList.login
 +nocsrf
-POST    /validate1                   controllers.ExpensesList.validate1
+POST    /validate                   controllers.ExpensesList.validate()
 +nocsrf
-POST    /createUser1                 controllers.ExpensesList.createUser
+POST	/createUser                 controllers.ExpensesList.createUser
+GET     /logout                     controllers.ExpensesList.logout
 
-GET     /logout1                     controllers.ExpensesList.logout
+# Routes for expenses
+#GET     /list                       controllers.ExpensesList.expensesList
 +nocsrf
-POST    /addExpense                  controllers.ExpensesList.addExpense
+POST	/addExpense                 controllers.ExpensesList.addExpense
 +nocsrf
-POST    /deleteExpense               controllers.ExpensesList.deleteExpense
-
-# An example controller showing how to write asynchronous code
-
+POST	/deleteExpense              controllers.ExpensesList.deleteExpense
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

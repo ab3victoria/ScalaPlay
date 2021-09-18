@@ -13,8 +13,6 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
     Ok(views.html.index("Your Expenses List"))
   }
 
-  def product(prodName: String, prodCategory: String, prodPrice: Double)= Action{
-    Ok(s"Product name is: $prodName, Category: $prodCategory, Price:$prodPrice")
-  }
+
 
 }
