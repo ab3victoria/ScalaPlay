@@ -1,0 +1,14 @@
+@()(implicit request: RequestHeader, flash: Flash)
+
+@main(){
+    <input type="hidden" id="csrfToken" value="@helper.CSRF.getToken.value">
+    <input type="hidden" id="validateRoute" value="@routes.ExpensesList.validate()">
+    <input type="hidden" id="expensesRoute" value="@routes.ExpensesList.expensesRoute">
+    <input type="hidden" id="createRoute" value="@routes.ExpensesList.createUser">
+    <input type="hidden" id="deleteRoute" value="@routes.ExpensesList.deleteExpense">
+    <input type="hidden" id="addRoute" value="@routes.ExpensesList.addExpense">
+    <input type="hidden" id="logoutRoute" value="@routes.ExpensesList.logout">
+
+    <div id="react-root"></div>
+    <script src="@routes.Assets.versioned("javascript/main.js")"></script>
+}

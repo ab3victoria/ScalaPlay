@@ -1,9 +1,9 @@
 package controllers
 
-import models._
 import models.{ExpenseData, ExpenseListDatabaseModel, UserData}
 
 import javax.inject._
+
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.mvc._
@@ -15,10 +15,12 @@ import slick.jdbc.PostgresProfile.api._
 class ExpensesList @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, cc: ControllerComponents)(implicit ec: ExecutionContext)
   extends AbstractController(cc) with HasDatabaseConfigProvider[JdbcProfile] {
 
+  // Variable to hold database model methods
   private val model = new ExpenseListDatabaseModel(db)
 
   // Helpers to serialize json objects
   implicit val userDataReads = Json.reads[UserData]
+  implicit val userDataWrites = Json.writes[UserData]
   implicit val expenseDataReads = Json.reads[ExpenseData]
   implicit val expenseDataWrites = Json.writes[ExpenseData]
 
@@ -26,7 +28,7 @@ class ExpensesList @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     request.body.asJson.map { body =>
       Json.fromJson[A](body) match {
         case JsSuccess(a, path) => f(a)
-        case e@JsError(_) => Future.successful(Redirect(routes.ExpensesList.login))
+        case e @ JsError(_) => Future.successful(Redirect(routes.ExpensesList.login))
       }
     }.getOrElse(Future.successful(Redirect(routes.ExpensesList.login)))
   }
@@ -40,7 +42,7 @@ class ExpensesList @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   }
 
   def load = Action { implicit request =>
-    Ok(views.html.index("Main LOAD"))
+    Ok(views.html.home())
   }
 
   def login = Action { implicit request =>
@@ -61,12 +63,14 @@ class ExpensesList @Inject() (protected val dbConfigProvider: DatabaseConfigProv
 
   def createUser = Action.async { implicit request =>
     withJsonBody[UserData] { ud =>
-      model.createUser(ud.username, ud.password).map {
-        case Some(userid) =>
-          Ok(Json.toJson(true))
-            .withSession("username" -> ud.username, "userid" -> userid.toString, "csrfToken" -> play.filters.csrf.CSRF.getToken.map(_.value).getOrElse(""))
-        case None =>
-          Ok(Json.toJson(false))
+      model.createUser(ud.username, ud.password).map { ouserId =>
+        ouserId match {
+          case Some(userid) =>
+            Ok(Json.toJson(true))
+              .withSession("username" -> ud.username, "userid" -> userid.toString, "csrfToken" -> play.filters.csrf.CSRF.getToken.map(_.value).getOrElse(""))
+          case None =>
+            Ok(Json.toJson(false))
+        }
       }
     }
   }
@@ -77,7 +81,7 @@ class ExpensesList @Inject() (protected val dbConfigProvider: DatabaseConfigProv
 
   def expenseList: Action[AnyContent] = Action.async { implicit request =>
     withSessionUsername { username =>
-      println("--- Getting tasks ---")
+      println("--- Getting expenses ---")
       model.getExpenses(username).map(expenses => Ok(Json.toJson(expenses)))
     }
   }

@@ -3,8 +3,9 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+GET     /                           controllers.ExpensesList.load
+
 # Routes for users
-GET     /                           controllers.Application.index
 GET     /login                      controllers.ExpensesList.login
 +nocsrf
 POST    /validate                   controllers.ExpensesList.validate()
@@ -13,7 +14,7 @@ POST	/createUser                 controllers.ExpensesList.createUser
 GET     /logout                     controllers.ExpensesList.logout
 
 # Routes for expenses
-#GET     /list                       controllers.ExpensesList.expensesList
+GET     /list                       controllers.ExpensesList.expenseList
 +nocsrf
 POST	/addExpense                 controllers.ExpensesList.addExpense
 +nocsrf
