@@ -1,6 +1,6 @@
 package controllers
 
-import models.{ExpenseData, ExpenseListDatabaseModel, UserData}
+import models.{ExpenseData, UserData, ExpenseListDatabaseModel}
 
 import javax.inject._
 
@@ -9,7 +9,6 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.mvc._
 import play.api.libs.json._
 import slick.jdbc.JdbcProfile
-import slick.jdbc.PostgresProfile.api._
 
 @Singleton
 class ExpensesList @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, cc: ControllerComponents)(implicit ec: ExecutionContext)
@@ -19,6 +18,7 @@ class ExpensesList @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   private val model = new ExpenseListDatabaseModel(db)
 
   // Helpers to serialize json objects
+  // TODO: Check if all Reads/Writes needed
   implicit val userDataReads = Json.reads[UserData]
   implicit val userDataWrites = Json.writes[UserData]
   implicit val expenseDataReads = Json.reads[ExpenseData]
@@ -42,14 +42,17 @@ class ExpensesList @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   }
 
   def load = Action { implicit request =>
+    println("--- load ---")
     Ok(views.html.home())
   }
 
   def login = Action { implicit request =>
+    println("--- login ---")
     Ok(views.html.login())
   }
 
   def validate = Action.async { implicit request =>
+    println("--- validate ---")
     withJsonBody[UserData] { ud =>
       model.validateUser(ud.username, ud.password).map {
         case Some(userid) =>
@@ -62,12 +65,15 @@ class ExpensesList @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   }
 
   def createUser = Action.async { implicit request =>
+    println("--- createUser ---")
     withJsonBody[UserData] { ud =>
       model.createUser(ud.username, ud.password).map { ouserId =>
         ouserId match {
-          case Some(userid) =>
+          case Some(userid) => {
+            println(userid)
             Ok(Json.toJson(true))
               .withSession("username" -> ud.username, "userid" -> userid.toString, "csrfToken" -> play.filters.csrf.CSRF.getToken.map(_.value).getOrElse(""))
+          }
           case None =>
             Ok(Json.toJson(false))
         }
@@ -76,25 +82,34 @@ class ExpensesList @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   }
 
   def logout = Action { implicit request =>
+    println("--- logout ---")
     Ok(Json.toJson(true)).withSession(request.session - "username")
   }
 
-  def expenseList: Action[AnyContent] = Action.async { implicit request =>
+  def expenseList = Action.async { implicit request =>
+    println("--- expenseList ---")
     withSessionUsername { username =>
       println("--- Getting expenses ---")
-      model.getExpenses(username).map(expenses => Ok(Json.toJson(expenses)))
+      model.getExpenses(username).map(expenses => {
+        println(s"-------- Expenses: ${expenses}")
+        Ok(Json.toJson(expenses))
+      })
     }
   }
 
   def addExpense = Action.async { implicit request =>
+    println("--- addExpense ---")
     withSessionUserid { userid =>
+      println(s"*** userId: ${userid}")
       withJsonBody[ExpenseData] { expense =>
+        println(s"*** expenseData: ${expense}")
         model.addExpense(userid, expense).map(count => Ok(Json.toJson(count > 0)))
       }
     }
   }
 
   def deleteExpense = Action.async { implicit request =>
+    println("--- deleteExpense ---")
     withSessionUsername { username =>
       withJsonBody[Int] { expenseId =>
         model.removeExpense(expenseId).map(removed => Ok(Json.toJson(removed)))

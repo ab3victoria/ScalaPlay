@@ -1,4 +1,4 @@
-@(expenses: Seq[String])
+@(expenses: Seq[String])(implicit request: RequestHeader, flash: Flash)
 
 @main("Expense List"){
 
@@ -24,8 +24,14 @@
             }
             </ul>
 
+            <h2>Add Expense</h2>
             <form method="post" action="@routes.ExpensesList.addExpense">
-                <input type="text" name="newExpense">
+                Name: <input type="text" name="expenseName">
+                <br>
+                Price:  <input type="text" name="expensePrice">
+                <br>
+                Date:  <input type="date" name="expenseCost">
+                <br>
                 <input type="submit">
             </form>
 

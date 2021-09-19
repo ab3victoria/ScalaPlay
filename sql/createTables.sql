@@ -16,8 +16,6 @@ CREATE TABLE expenses (
                           expense_id SERIAL PRIMARY KEY,
                           user_id int4 NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                           title varchar(200) NOT NULL,
-                          category varchar(200) NOT NULL,
                           cost numeric(7, 3) NOT NULL,
-                          date varchar(10) NOT NULL,
-                          time varchar(5) NOT NULL
+                          date varchar(10) NOT NULL
 );

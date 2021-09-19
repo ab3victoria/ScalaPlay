@@ -75,12 +75,13 @@ class LoginComponent extends React.Component {
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'Csrf-Token': csrfToken },
       body: JSON.stringify({ username, password })
-    }).then(res => res.json()).then(data => {
-      if(data) {
-        this.props.doLogin();
-      } else {
-        this.setState({ loginMessage: "Login Failed" });
-      }
+    }).then(res => res.json())
+        .then(data => {
+          if(data) {
+            this.props.doLogin();
+          } else {
+            this.setState({ loginMessage: "Login Failed" });
+          }
     });
   }
 
@@ -104,11 +105,22 @@ class LoginComponent extends React.Component {
 class ExpensesListComponent extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { expenses: [], newExpense: "", expenseMessage: "" };
+    this.state = {
+      expenses: [],
+      newExpenseTitle: "",
+      newExpenseCost: "",
+      newExpenseDate: "",
+      expenseMessage: ""
+    };
+    this.changerHandler = this.changerHandler.bind(this);
   }
 
   componentDidMount() {
     this.loadExpenses();
+  }
+
+  changerHandler(e) {
+    this.setState({ [e.target['id']]: e.target.value });
   }
 
   render() {
@@ -116,40 +128,48 @@ class ExpensesListComponent extends React.Component {
         'Expense List',
         ce('br'),
         ce('ul', null,
-            this.state.expenses.map(expense => ce('li', { key: expense.id, onClick: e => this.handleDeleteClick(expense.id) }, expense.text))
+            this.state.expenses.map(expense =>
+                ce('li', { key: expense.expenseId, onClick: e => this.handleDeleteClick(expense.id) },
+                    `Title: ${expense.title}, Cost: ${expense.cost}, Date: ${expense.date} `))
         ),
         ce('br'),
         ce('div', null,
-            ce('input', {type: 'text', value: this.state.newExpense, onChange: e => this.handleChange(e) }),
-            ce('button', {onClick: e => this.handleAddClick(e)}, 'Add Expense'),
+            ce('h3', null, 'Add Expense'),
+            ce('br'),
+            ce('input', {name: "newExpenseTitle", type: 'text', id: "newExpenseTitle", onChange: e => this.changerHandler(e) }),
+            ce('input', {name: "newExpenseCost", type: 'number', id: "newExpenseCost", onChange: e => this.changerHandler(e) }),
+            ce('input', {name: "newExpenseDate", type: 'date', id: "newExpenseDate", onChange: e => this.changerHandler(e) }),
+            ce('br'),
+            ce('button', {onClick: e => this.handleAddExpense(e)}, 'Add Expense'),
             this.state.expenseMessage
         ),
         ce('br'),
-        ce('button', { onClick: e => this.props.doLogout() }, 'Log out')
+        ce('button', { onClick: () => this.props.doLogout() }, 'Log out')
     );
   }
 
   loadExpenses() {
-    fetch(expensesRoute).then(res => res.json()).then(tasks => this.setState({ tasks }));
+    fetch(expensesRoute).then(res => res.json()).then(expenses => this.setState({ expenses }));
   }
 
-  handleChange(e) {
-    this.setState({newExpense: e.target.value})
-  }
-
-  handleAddClick(e) {
+  handleAddExpense(e) {
+    const expenseId = 0
+    const title = this.state.newExpenseTitle;
+    const cost = this.state.newExpenseCost;
+    const date = this.state.newExpenseDate;
     fetch(addRoute, {
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'Csrf-Token': csrfToken },
-      body: JSON.stringify(this.state.newExpense)
+      body: JSON.stringify({ expenseId, title, cost, date }),
     }).then(res => res.json()).then(data => {
+      console.log(data)
       if(data) {
         this.loadExpenses();
-        this.setState({ expenseMessage: "", newExpense: "" });
+        this.setState({ newExpenseTitle: "", newExpenseCost: "", newExpenseDate: "", expenseMessage: "" });
       } else {
         this.setState({ expenseMessage: "Failed to add." });
       }
-    });
+    }).catch(e => console.log(`Error: ${e}`));
   }
 
   handleDeleteClick(i) {

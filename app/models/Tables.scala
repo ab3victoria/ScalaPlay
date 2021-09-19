@@ -22,21 +22,19 @@ trait Tables {
    *  @param expenseId Database column expense_id SqlType(serial), AutoInc, PrimaryKey
    *  @param userId Database column user_id SqlType(int4)
    *  @param title Database column title SqlType(varchar), Length(200,true)
-   *  @param category Database column category SqlType(varchar), Length(200,true)
    *  @param cost Database column cost SqlType(numeric)
-   *  @param date Database column date SqlType(varchar), Length(10,true)
-   *  @param time Database column time SqlType(varchar), Length(5,true) */
-  case class ExpensesRow(expenseId: Int, userId: Int, title: String, category: String, cost: scala.math.BigDecimal, date: String, time: String)
+   *  @param date Database column date SqlType(varchar), Length(10,true) */
+  case class ExpensesRow(expenseId: Int, userId: Int, title: String, cost: scala.math.BigDecimal, date: String)
   /** GetResult implicit for fetching ExpensesRow objects using plain SQL queries */
   implicit def GetResultExpensesRow(implicit e0: GR[Int], e1: GR[String], e2: GR[scala.math.BigDecimal]): GR[ExpensesRow] = GR{
     prs => import prs._
-    ExpensesRow.tupled((<<[Int], <<[Int], <<[String], <<[String], <<[scala.math.BigDecimal], <<[String], <<[String]))
+    ExpensesRow.tupled((<<[Int], <<[Int], <<[String], <<[scala.math.BigDecimal], <<[String]))
   }
   /** Table description of table expenses. Objects of this class serve as prototypes for rows in queries. */
   class Expenses(_tableTag: Tag) extends profile.api.Table[ExpensesRow](_tableTag, "expenses") {
-    def * = (expenseId, userId, title, category, cost, date, time) <> (ExpensesRow.tupled, ExpensesRow.unapply)
+    def * = (expenseId, userId, title, cost, date) <> (ExpensesRow.tupled, ExpensesRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = ((Rep.Some(expenseId), Rep.Some(userId), Rep.Some(title), Rep.Some(category), Rep.Some(cost), Rep.Some(date), Rep.Some(time))).shaped.<>({r=>import r._; _1.map(_=> ExpensesRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = ((Rep.Some(expenseId), Rep.Some(userId), Rep.Some(title), Rep.Some(cost), Rep.Some(date))).shaped.<>({r=>import r._; _1.map(_=> ExpensesRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column expense_id SqlType(serial), AutoInc, PrimaryKey */
     val expenseId: Rep[Int] = column[Int]("expense_id", O.AutoInc, O.PrimaryKey)
@@ -44,14 +42,10 @@ trait Tables {
     val userId: Rep[Int] = column[Int]("user_id")
     /** Database column title SqlType(varchar), Length(200,true) */
     val title: Rep[String] = column[String]("title", O.Length(200,varying=true))
-    /** Database column category SqlType(varchar), Length(200,true) */
-    val category: Rep[String] = column[String]("category", O.Length(200,varying=true))
     /** Database column cost SqlType(numeric) */
     val cost: Rep[scala.math.BigDecimal] = column[scala.math.BigDecimal]("cost")
     /** Database column date SqlType(varchar), Length(10,true) */
     val date: Rep[String] = column[String]("date", O.Length(10,varying=true))
-    /** Database column time SqlType(varchar), Length(5,true) */
-    val time: Rep[String] = column[String]("time", O.Length(5,varying=true))
 
     /** Foreign key referencing Users (database name expenses_user_id_fkey) */
     lazy val usersFk = foreignKey("expenses_user_id_fkey", userId, Users)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.Cascade)

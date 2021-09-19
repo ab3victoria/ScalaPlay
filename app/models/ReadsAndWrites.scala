@@ -5,8 +5,8 @@ import play.api.libs.json.{Json, OWrites, Reads}
 import java.time.{LocalDate, LocalTime}
 
 case class UserData(username: String, password: String)
-case class ExpenseData(expenseId: Int, title: String, category: String, cost: BigDecimal, date: String, time: String)
-// TODO: Check if need to add userId to ExpenseData
+//case class ExpenseData(expenseId: Int, title: String, category: String, cost: BigDecimal, date: String, time: String)
+case class ExpenseData(expenseId: Int, title: String, cost: BigDecimal, date: String)
 // TODO: Check how to change cost type from BigDecimal to Double (in sql)
 
 
